@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# artefatos de modelo gerados no build
+model-service/model.pkl
+
+# Terraform (state e plugins ficam em terraform/.gitignore tambem)
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
