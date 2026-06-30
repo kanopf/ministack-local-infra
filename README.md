@@ -7,20 +7,75 @@ Simula um fluxo típico: ler dados de uma tabela, gravar num bucket, rodar
 inferência num modelo e entregar o resultado para um consumidor — tudo
 sem custo e sem AWS de verdade.
 
-## TL;DR — rodar tudo com um comando
+> 📖 Quer entender **como tudo funciona por dentro** e o que cada passo faz?
+> Veja [EXPLICACAO.md](EXPLICACAO.md) — explicação detalhada peça por peça.
 
-Pré-requisito: **Docker** e **Terraform** disponíveis (ex.: dentro do WSL).
+## Como este lab está montado
+
+Foi desenvolvido em **Windows + WSL2**: o **Docker roda dentro do WSL2**
+(Ubuntu) e o **navegador do Windows acessa os serviços via `localhost`** —
+o WSL2 encaminha automaticamente as portas publicadas para o Windows. Ou
+seja, o WSL "hospeda" a infra e o Windows é só o cliente (browser/terminal).
+
+Mas como dentro do WSL **é Linux**, o projeto roda **igual em Linux nativo**.
+As duas formas estão documentadas abaixo.
+
+## Pré-requisitos
+- **Docker** (Engine + plugin `compose`) e **Terraform**.
+- No Windows: tudo isso instalado **dentro do WSL2** (não precisa de Docker
+  Desktop; Docker Engine nativo no WSL com systemd funciona).
+
+## Rodar tudo com um comando
+
+### Opção A — Windows + WSL2
+
+A partir do PowerShell do Windows (o `--cd` evita problemas com o espaço em
+"github repos"):
+
+```powershell
+wsl --cd "C:\Users\crist\OneDrive\Documentos\github repos\ministack-local-infra" -- bash run.sh
+```
+
+Ou: abra o terminal do Ubuntu (WSL), navegue até o repo em `/mnt/c/...` e
+rode `bash run.sh`.
+
+### Opção B — Linux nativo
+
+Clone o repo em qualquer lugar e rode:
 
 ```bash
+git clone <url-do-repo> ministack-local-infra
+cd ministack-local-infra
 bash run.sh
 ```
 
-Isso faz: build das imagens → sobe a infra → Terraform cria bucket/tabela →
-roda a pipeline → mostra o que a print-api recebeu. Para derrubar:
+> Em ambos os casos o `run.sh` faz: build das imagens → sobe a infra →
+> Terraform cria bucket/tabela/seed → roda a pipeline → mostra o que a
+> print-api recebeu.
 
+Para derrubar:
 ```bash
 docker compose down
 ```
+
+## Acessar no navegador
+
+Depois de subir, abra no navegador (no Windows **ou** no Linux, sempre
+`localhost` — no WSL2 o encaminhamento é automático):
+
+| URL                                         | O que mostra                                  |
+|---------------------------------------------|-----------------------------------------------|
+| http://localhost:9000/                      | **Tela da print-api**: tabela de resultados (auto-atualiza a cada 3s) |
+| http://localhost:9000/results               | Resultados recebidos em JSON                  |
+| http://localhost:9000/docs                  | Swagger UI da print-api                       |
+| http://localhost:8000/docs                  | Swagger UI do modelo (testar `/predict` ali)  |
+| http://localhost:4566/_ministack/health     | Status do MiniStack                           |
+
+> Rode a pipeline de novo com a tela `localhost:9000` aberta para ver os
+> resultados aparecerem ao vivo:
+> ```bash
+> docker compose run --rm pipeline
+> ```
 
 ## Arquitetura
 
@@ -37,7 +92,7 @@ docker compose down
    │ /predict   │              │ 3b
    └────────────┘              ▼
                         ┌────────────┐
-                        │  print-api │ ← printa o resultado
+                        │  print-api │ ← recebe, guarda e mostra no navegador
                         │   :9000    │
                         └────────────┘
 ```
@@ -46,7 +101,7 @@ docker compose down
 |-----------------|--------------------------------------------------|-------|
 | `ministack`     | Emulador AWS (S3 + DynamoDB) numa porta só       | 4566  |
 | `model-service` | CARA 1 — modelo scikit-learn servindo `/predict` | 8000  |
-| `print-api`     | CARA 2 — recebe o resultado e printa             | 9000  |
+| `print-api`     | CARA 2 — recebe o resultado, guarda e exibe      | 9000  |
 | `pipeline`      | Orquestrador one-shot do fluxo                   | —     |
 
 O modelo é genérico: regressão linear em dados sintéticos
@@ -68,10 +123,10 @@ ministack-local-infra/
 │   ├── requirements.txt
 │   ├── train.py            treina e salva model.pkl no build
 │   └── app.py              FastAPI: /health e /predict
-├── print-api/              CARA 2 — consumidor que printa
+├── print-api/              CARA 2 — consumidor que recebe e exibe
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   └── app.py              FastAPI: /results
+│   └── app.py              FastAPI: / (HTML), /results, POST /results
 └── pipeline/               orquestrador
     ├── Dockerfile
     ├── requirements.txt
@@ -91,16 +146,12 @@ cd terraform && terraform init && terraform apply -auto-approve && cd ..
 # 3) rodar a pipeline (job one-shot na rede do compose)
 docker compose run --rm pipeline
 
-# 4) ver o que a print-api recebeu
+# 4) ver o que a print-api recebeu (log) ou abrir http://localhost:9000/
 docker compose logs print-api
 
 # (opcional) conferir a infra
 docker compose run --rm pipeline python verify_infra.py
 ```
-
-> Rodando no WSL com o repo num caminho com espaços? Use
-> `wsl --cd "C:\...\ministack-local-infra" -- bash run.sh` para evitar
-> problemas de quoting.
 
 ## Como funciona o MiniStack (resumo)
 A AWS é só um conjunto de APIs HTTP. O MiniStack é um único servidor que
