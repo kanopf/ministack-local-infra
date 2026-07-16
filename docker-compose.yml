@@ -1,0 +1,50 @@
+# Infra local completa: MiniStack (emulador AWS) + os "3 caras".
+#
+# As imagens sao construidas A PARTIR DESTE REPO (campo build). Assim a
+# pessoa so precisa de Docker -- nada pre-construido. Todos os servicos
+# ficam na rede 'ministack-net' e se enxergam pelo nome do container.
+
+services:
+  ministack:                   # emulador AWS (S3 + DynamoDB) numa porta so
+    image: ministackorg/ministack
+    container_name: ministack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,dynamodb
+
+  model-service:               # CARA 1: inferencia
+    build: ./model-service
+    image: model-service:1.0
+    container_name: model-service
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  print-api:                   # CARA 2: consumidor que printa
+    build: ./print-api
+    image: print-api:1.0
+    container_name: print-api
+    ports:
+      - "9000:9000"
+
+  pipeline:                    # orquestrador (job one-shot, nao sobe no 'up')
+    build: ./pipeline
+    image: pipeline:1.0
+    profiles: ["tools"]        # rode com: docker compose run --rm pipeline
+    environment:
+      - MINISTACK_ENDPOINT=http://ministack:4566
+      - MODEL_URL=http://model-service:8000
+      - PRINT_API_URL=http://print-api:9000
+    depends_on:
+      - ministack
+      - model-service
+      - print-api
+
+networks:
+  default:
+    name: ministack-net        # rede compartilhada para os caras conversarem
