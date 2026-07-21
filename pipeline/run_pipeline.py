@@ -11,6 +11,7 @@ Fluxo:
 Endpoints sao configuraveis por env var para funcionar tanto rodando
 no host (localhost) quanto dentro da rede Docker (nome do container).
 """
+
 import os
 import json
 import boto3
@@ -26,8 +27,9 @@ BUCKET_NAME = os.environ.get("BUCKET_NAME", "ml-predictions")
 aws_common = dict(
     endpoint_url=MINISTACK_ENDPOINT,
     region_name="us-east-1",
-    aws_access_key_id="test",
-    aws_secret_access_key="test",
+    # credenciais ficticias: o MiniStack (emulador local) nao valida SigV4
+    aws_access_key_id="test",  # nosec B106
+    aws_secret_access_key="test",  # nosec B106
 )
 s3 = boto3.client("s3", **aws_common)
 ddb = boto3.client("dynamodb", **aws_common)
@@ -63,7 +65,9 @@ def main():
         put_json(f"raw/{rec_id}.json", {"id": rec_id, "features": features})
 
         # 3) roda a inferencia chamando o modelo
-        r = requests.post(f"{MODEL_URL}/predict", json={"features": features}, timeout=10)
+        r = requests.post(
+            f"{MODEL_URL}/predict", json={"features": features}, timeout=10
+        )
         r.raise_for_status()
         prediction = r.json()["prediction"]
         print(f"  [model] prediction={prediction:.4f}")

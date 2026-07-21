@@ -7,6 +7,7 @@ Sobe um HTTP server com:
 
 Carrega o model.pkl que foi treinado e "assado" na imagem (ver train.py).
 """
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 import joblib

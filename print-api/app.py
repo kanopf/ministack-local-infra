@@ -7,6 +7,7 @@ print-api (CARA 2).
 - GET  /health  : checagem de saude
 - GET  /docs    : Swagger UI (gerado automaticamente pelo FastAPI)
 """
+
 import json
 from datetime import datetime
 from fastapi import FastAPI, Request
@@ -26,7 +27,10 @@ def health():
 @app.post("/results")
 async def results(request: Request):
     payload = await request.json()
-    registro = {"recebido_em": datetime.now().isoformat(timespec="seconds"), "payload": payload}
+    registro = {
+        "recebido_em": datetime.now().isoformat(timespec="seconds"),
+        "payload": payload,
+    }
     _recebidos.append(registro)
 
     print("=" * 60, flush=True)
@@ -55,7 +59,9 @@ def home():
             "</tr>"
         )
     if not linhas:
-        linhas = '<tr><td colspan="4">Nenhum resultado ainda. Rode a pipeline.</td></tr>'
+        linhas = (
+            '<tr><td colspan="4">Nenhum resultado ainda. Rode a pipeline.</td></tr>'
+        )
 
     return f"""<!doctype html>
 <html lang="pt-br">

@@ -6,6 +6,7 @@ Nao importa o dominio real -- a graca aqui e ter um artefato de modelo
 treinado, salvo em disco, que sera "assado" dentro da imagem Docker.
 Esse e o padrao real de serving: treina offline -> salva artefato -> serve.
 """
+
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import joblib

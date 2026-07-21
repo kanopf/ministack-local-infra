@@ -1,4 +1,5 @@
 """Confere que o bucket e a tabela existem de verdade no MiniStack."""
+
 import os
 import boto3
 
@@ -8,8 +9,9 @@ ENDPOINT = os.environ.get("MINISTACK_ENDPOINT", "http://localhost:4566")
 common = dict(
     endpoint_url=ENDPOINT,
     region_name="us-east-1",
-    aws_access_key_id="test",
-    aws_secret_access_key="test",
+    # credenciais ficticias: o MiniStack (emulador local) nao valida SigV4
+    aws_access_key_id="test",  # nosec B106
+    aws_secret_access_key="test",  # nosec B106
 )
 
 s3 = boto3.client("s3", **common)

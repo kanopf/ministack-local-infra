@@ -65,11 +65,11 @@ Depois de subir, abra no navegador (no Windows **ou** no Linux, sempre
 
 | URL                                         | O que mostra                                  |
 |---------------------------------------------|-----------------------------------------------|
-| http://localhost:9000/                      | **Tela da print-api**: tabela de resultados (auto-atualiza a cada 3s) |
-| http://localhost:9000/results               | Resultados recebidos em JSON                  |
-| http://localhost:9000/docs                  | Swagger UI da print-api                       |
-| http://localhost:8000/docs                  | Swagger UI do modelo (testar `/predict` ali)  |
-| http://localhost:4566/_ministack/health     | Status do MiniStack                           |
+| <http://localhost:9000/>                    | **Tela da print-api**: tabela de resultados (auto-atualiza a cada 3s) |
+| <http://localhost:9000/results>             | Resultados recebidos em JSON                  |
+| <http://localhost:9000/docs>                | Swagger UI da print-api                       |
+| <http://localhost:8000/docs>                | Swagger UI do modelo (testar `/predict` ali)  |
+| <http://localhost:4566/_ministack/health>   | Status do MiniStack                           |
 
 > Rode a pipeline de novo com a tela `localhost:9000` aberta para ver os
 > resultados aparecerem ao vivo:
@@ -79,7 +79,7 @@ Depois de subir, abra no navegador (no Windows **ou** no Linux, sempre
 
 ## Arquitetura
 
-```
+```text
    ┌────────────┐   1. lê da tabela (DynamoDB)
    │  MiniStack │◄──────────────┐
    │   :4566    │   2. grava no bucket (S3)
@@ -109,7 +109,7 @@ O modelo é genérico: regressão linear em dados sintéticos
 
 ## Estrutura do repositório
 
-```
+```text
 ministack-local-infra/
 ├── README.md
 ├── run.sh                  roda tudo em um comando

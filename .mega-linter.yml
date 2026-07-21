@@ -21,11 +21,17 @@ ENABLE_LINTERS:
 
   # ---- SEGURANCA ----
   - PYTHON_BANDIT           # SAST Python
-  - REPOSITORY_CHECKOV      # misconfig de IaC (Terraform + Dockerfile)
-  - REPOSITORY_TRIVY        # vulnerabilidades + misconfig + segredos
+  - REPOSITORY_CHECKOV      # AUTORIDADE de misconfig de IaC (Terraform + Docker)
+  - REPOSITORY_TRIVY        # vulnerabilidades de dependencias + segredos
   - REPOSITORY_GITLEAKS     # segredos no historico/arquivos
   - REPOSITORY_SECRETLINT   # segredos (regras complementares)
   - REPOSITORY_TRUFFLEHOG   # segredos verificaveis
+
+# Trivy foca em vulnerabilidades e segredos; a analise de misconfig de IaC fica
+# a cargo do checkov (evita dupla contagem dos mesmos achados de S3/Dockerfile).
+REPOSITORY_TRIVY_ARGUMENTS:
+  - "--scanners"
+  - "vuln,secret"
 
 # Falha o job (exit != 0) quando algum erro for encontrado — trava o merge.
 DISABLE_ERRORS: false

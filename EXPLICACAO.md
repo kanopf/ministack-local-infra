@@ -43,7 +43,7 @@ por hostname (`s3.amazonaws.com`, `dynamodb.amazonaws.com`). O MiniStack não
 — ele descobre qual serviço você quer lendo o **nome do serviço embutido na
 assinatura SigV4**, que vai no header `Authorization`:
 
-```
+```text
 Authorization: AWS4-HMAC-SHA256 Credential=test/20260629/us-east-1/s3/aws4_request, ...
                                                               ▲▲
                                           o "s3" aqui diz ao MiniStack: é o serviço S3
@@ -484,7 +484,7 @@ docker compose logs print-api | tail -30  # mostra o que a print-api recebeu
 
 ## 10. O fluxo inteiro amarrado
 
-```
+```text
 você: bash run.sh
    │
    ├─(1) docker compose up -d --build
@@ -523,8 +523,8 @@ O WSL2 encaminha `localhost` pro Windows (em Linux nativo é direto):
 
 | URL                                       | Mostra                                    |
 |-------------------------------------------|-------------------------------------------|
-| http://localhost:9000/                    | Tela da print-api (tabela, auto-refresh)  |
-| http://localhost:9000/results             | Resultados em JSON                        |
-| http://localhost:9000/docs                | Swagger UI da print-api                   |
-| http://localhost:8000/docs                | Swagger UI do modelo (testar `/predict`)  |
-| http://localhost:4566/_ministack/health   | Status do MiniStack                       |
+| <http://localhost:9000/>                  | Tela da print-api (tabela, auto-refresh)  |
+| <http://localhost:9000/results>           | Resultados em JSON                        |
+| <http://localhost:9000/docs>              | Swagger UI da print-api                   |
+| <http://localhost:8000/docs>              | Swagger UI do modelo (testar `/predict`)  |
+| <http://localhost:4566/_ministack/health> | Status do MiniStack                       |
