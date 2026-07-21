@@ -1,47 +1,45 @@
 ---
 # Configuracao do MegaLinter — https://megalinter.io/latest/config-file/
-# Define quais linters rodam e como reportam. Usado pelo workflow
+# Gate de QUALIDADE + SEGURANCA. Usado pelo workflow
 # .github/workflows/megalinter.yml.
+#
+# IMPORTANTE: usamos SOMENTE ENABLE_LINTERS (lista unica da verdade). Com
+# ENABLE_LINTERS definido, rodam EXATAMENTE os linters abaixo e nada mais.
+# (Nao use ENABLE junto: ENABLE liga a linguagem inteira e traz TODOS os
+# linters dela, ignorando esta lista — foi o que inflou o primeiro relatorio.)
 
-# Linguagens/formatos presentes no repo. Deixe vazio (ENABLE) para que o
-# MegaLinter descubra automaticamente; aqui listamos so o que existe para
-# a execucao ficar rapida e focada.
-ENABLE:
-  - PYTHON        # model-service, print-api, pipeline
-  - TERRAFORM     # pasta terraform/
-  - DOCKERFILE    # Dockerfiles dos servicos
-  - BASH          # run.sh
-  - YAML          # docker-compose.yml, workflows
-  - MARKDOWN      # README.md, EXPLICACAO.md
-  - REPOSITORY    # secrets, gitleaks, checkov etc.
-
-# Linters especificos ativados por linguagem.
 ENABLE_LINTERS:
-  - PYTHON_RUFF          # lint rapido de Python
-  - PYTHON_BLACK         # formatacao Python
-  - TERRAFORM_TFLINT     # boas praticas Terraform
-  - TERRAFORM_TERRAFORM_FMT  # formatacao HCL
-  - DOCKERFILE_HADOLINT  # boas praticas Dockerfile
-  - BASH_SHELLCHECK      # analise estatica de shell
-  - YAML_YAMLLINT
-  - MARKDOWN_MARKDOWNLINT
-  - REPOSITORY_SECRETLINT
-  - REPOSITORY_GITLEAKS
+  # ---- QUALIDADE ----
+  - PYTHON_RUFF              # lint rapido (substitui flake8 + isort)
+  - PYTHON_BLACK            # formatacao Python
+  - TERRAFORM_TERRAFORM_FMT # formatacao HCL
+  - TERRAFORM_TFLINT        # boas praticas Terraform
+  - DOCKERFILE_HADOLINT     # boas praticas Dockerfile
+  - BASH_SHELLCHECK         # analise estatica de shell (run.sh)
+  - YAML_YAMLLINT           # docker-compose.yml, workflows
+  - MARKDOWN_MARKDOWNLINT   # README.md, EXPLICACAO.md
+
+  # ---- SEGURANCA ----
+  - PYTHON_BANDIT           # SAST Python
+  - REPOSITORY_CHECKOV      # misconfig de IaC (Terraform + Dockerfile)
+  - REPOSITORY_TRIVY        # vulnerabilidades + misconfig + segredos
+  - REPOSITORY_GITLEAKS     # segredos no historico/arquivos
+  - REPOSITORY_SECRETLINT   # segredos (regras complementares)
+  - REPOSITORY_TRUFFLEHOG   # segredos verificaveis
 
 # Falha o job (exit != 0) quando algum erro for encontrado — trava o merge.
 DISABLE_ERRORS: false
 
-# Mostra so os arquivos com erro no log, deixando a saida mais limpa.
 SHOW_ELAPSED_TIME: true
 FLAVOR_SUGGESTIONS: false
 PRINT_ALPACA: false
 
-# Aplica correcoes automaticas (formatacao) e comenta no PR o que mudou,
-# sem commitar sozinho — voce revisa e aplica.
+# Reporta o que consertaria, mas nao commita sozinho — voce revisa e aplica.
 APPLY_FIXES: none
 
-# Ignora artefatos e pastas que nao devem ser lintadas.
-FILTER_REGEX_EXCLUDE: (\.git/|\.terraform/|megalinter-reports/|__pycache__/|\.venv/)
+# Ignora artefatos e o state do Terraform (contem dados sensiveis; nao deve
+# ser lintado nem escaneado por scanners de segredo/misconfig).
+FILTER_REGEX_EXCLUDE: (\.git/|\.terraform/|\.tfstate|megalinter-reports/|__pycache__/|\.venv/)
 
 # Relatorios gerados.
 REPORTERS_MARKDOWN_TYPE: simple
