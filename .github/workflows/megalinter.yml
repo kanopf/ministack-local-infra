@@ -1,0 +1,59 @@
+---
+# MegaLinter — valida a qualidade do codigo do repositorio.
+# Roda em pushes e Pull Requests para main/develop e valida Python, Terraform,
+# Dockerfiles, Bash, YAML e Markdown (config em .mega-linter.yml).
+name: MegaLinter
+
+# Cancela execucoes antigas do mesmo branch/PR quando um novo push chega.
+concurrency:
+  group: megalinter-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  megalinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Permite comentar o resultado no Pull Request e anexar o SARIF.
+      pull-requests: write
+      issues: write
+      security-events: write
+    steps:
+      - name: Checkout do codigo
+        uses: actions/checkout@v4
+        with:
+          # Historico completo para o MegaLinter comparar so os arquivos alterados.
+          fetch-depth: 0
+
+      - name: Rodar MegaLinter
+        id: ml
+        # Imagem "full" (v8) para cobrir Python + Terraform + Docker + Bash.
+        uses: oxsecurity/megalinter@v8
+        env:
+          # Variaveis lidas pelo MegaLinter (o restante fica em .mega-linter.yml).
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Guardar relatorios como artefato
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: megalinter-reports
+          path: |
+            megalinter-reports
+            mega-linter.log
+          retention-days: 14

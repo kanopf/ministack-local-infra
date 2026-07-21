@@ -1,0 +1,48 @@
+---
+# Configuracao do MegaLinter — https://megalinter.io/latest/config-file/
+# Define quais linters rodam e como reportam. Usado pelo workflow
+# .github/workflows/megalinter.yml.
+
+# Linguagens/formatos presentes no repo. Deixe vazio (ENABLE) para que o
+# MegaLinter descubra automaticamente; aqui listamos so o que existe para
+# a execucao ficar rapida e focada.
+ENABLE:
+  - PYTHON        # model-service, print-api, pipeline
+  - TERRAFORM     # pasta terraform/
+  - DOCKERFILE    # Dockerfiles dos servicos
+  - BASH          # run.sh
+  - YAML          # docker-compose.yml, workflows
+  - MARKDOWN      # README.md, EXPLICACAO.md
+  - REPOSITORY    # secrets, gitleaks, checkov etc.
+
+# Linters especificos ativados por linguagem.
+ENABLE_LINTERS:
+  - PYTHON_RUFF          # lint rapido de Python
+  - PYTHON_BLACK         # formatacao Python
+  - TERRAFORM_TFLINT     # boas praticas Terraform
+  - TERRAFORM_TERRAFORM_FMT  # formatacao HCL
+  - DOCKERFILE_HADOLINT  # boas praticas Dockerfile
+  - BASH_SHELLCHECK      # analise estatica de shell
+  - YAML_YAMLLINT
+  - MARKDOWN_MARKDOWNLINT
+  - REPOSITORY_SECRETLINT
+  - REPOSITORY_GITLEAKS
+
+# Falha o job (exit != 0) quando algum erro for encontrado — trava o merge.
+DISABLE_ERRORS: false
+
+# Mostra so os arquivos com erro no log, deixando a saida mais limpa.
+SHOW_ELAPSED_TIME: true
+FLAVOR_SUGGESTIONS: false
+PRINT_ALPACA: false
+
+# Aplica correcoes automaticas (formatacao) e comenta no PR o que mudou,
+# sem commitar sozinho — voce revisa e aplica.
+APPLY_FIXES: none
+
+# Ignora artefatos e pastas que nao devem ser lintadas.
+FILTER_REGEX_EXCLUDE: (\.git/|\.terraform/|megalinter-reports/|__pycache__/|\.venv/)
+
+# Relatorios gerados.
+REPORTERS_MARKDOWN_TYPE: simple
+SARIF_REPORTER: true
