@@ -1,4 +1,0 @@
-- name: MegaLinter
-  # You may pin to the exact commit or the version.
-  # uses: oxsecurity/megalinter@ef3e84b8b836d76db562d0f3ed7da61e8fd538bc
-  uses: oxsecurity/megalinter@v9.6.0
